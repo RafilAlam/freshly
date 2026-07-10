@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(DevicePreview(builder: (context) => MyApp()));
@@ -42,18 +43,25 @@ class MyHomePage extends HookWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 52, 86, 66),
 
-        title: Text(title),
+        title: Text(title, style: GoogleFonts.geom(fontSize: 24.0)),
         centerTitle: false,
       ),
       body: Center(
-        child: ListView.builder(
+        child: ListView.separated(
+          padding: EdgeInsets.all(5.0),
           itemCount: itemsState.value.length,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (context, index) {
             return ListTile(
-              title: Text(itemsState.value[index].name),
+              title: Text(itemsState.value[index].name, style: GoogleFonts.lexend(fontSize: 15.0, color: const Color.fromARGB(203, 255, 255, 255))),
               tileColor: const Color.fromARGB(10, 189, 236, 185),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
               trailing: Text(itemsState.value[index].expiry),
             );
+          },
+          separatorBuilder: (context, index) {
+            return SizedBox(height: 8.0);
           },
         ),
       ),
@@ -67,10 +75,11 @@ class MyHomePage extends HookWidget {
                   ...itemsState.value,
                   Item(name: name, expiry: expiry),
                 ];
-              },) 
+              },
+            ),
           );
         },
-        backgroundColor: const Color.fromARGB(117, 114, 164, 116),
+        backgroundColor: const Color.fromARGB(255, 54, 94, 55),
         tooltip: 'Add new Item',
         child: const Icon(Icons.add),
       ),
@@ -108,17 +117,13 @@ class AddItemDialog extends HookWidget {
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                hintText: 'Item name',
-              ),
+              decoration: const InputDecoration(hintText: 'Item name'),
             ),
             TextField(
               readOnly: true,
               onTap: _selectDate,
               controller: expiryController,
-              decoration: const InputDecoration(
-                hintText: 'Expiration Date',
-              ),
+              decoration: const InputDecoration(hintText: 'Expiration Date'),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
@@ -132,7 +137,7 @@ class AddItemDialog extends HookWidget {
                 },
               ),
             ),
-          ]
+          ],
         ),
       ),
     );
