@@ -3,6 +3,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 void main() {
   runApp(DevicePreview(builder: (context) => MyApp()));
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Freshly',
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
       theme: ThemeData(
@@ -47,22 +48,44 @@ class MyHomePage extends HookWidget {
         centerTitle: false,
       ),
       body: Center(
-        child: ListView.separated(
-          padding: EdgeInsets.all(5.0),
-          itemCount: itemsState.value.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(itemsState.value[index].name, style: GoogleFonts.lexend(fontSize: 15.0, color: const Color.fromARGB(203, 255, 255, 255))),
-              tileColor: const Color.fromARGB(10, 189, 236, 185),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              trailing: Text(itemsState.value[index].expiry),
-            );
-          },
-          separatorBuilder: (context, index) {
-            return SizedBox(height: 8.0);
-          },
+        child: SlidableAutoCloseBehavior(
+          closeWhenOpened: true,
+          closeWhenTapped: true,
+          child: ListView.separated(
+            padding: EdgeInsets.all(5.0),
+            itemCount: itemsState.value.length,
+            itemBuilder: (context, index) {
+              return Slidable(
+                endActionPane: ActionPane(
+                  extentRatio: 0.2,
+                  motion: const ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      onPressed: (context) {
+                        itemsState.value = List.from(itemsState.value)..removeAt(index);
+                      },
+                      backgroundColor: const Color.fromARGB(255, 138, 53, 47),
+                      borderRadius: BorderRadius.horizontal(left: Radius.zero, right: Radius.circular(8.0)),
+                      icon: Icons.delete,
+                      label: 'Delete'
+                    )
+                  ]
+                ),
+          
+                child: ListTile(
+                  title: Text(itemsState.value[index].name, style: GoogleFonts.lexend(fontSize: 15.0, color: const Color.fromARGB(203, 255, 255, 255))),
+                  tileColor: const Color.fromARGB(10, 189, 236, 185),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  trailing: Text(itemsState.value[index].expiry),
+                ),
+              );
+            },
+            separatorBuilder: (context, index) {
+              return SizedBox(height: 8.0);
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
