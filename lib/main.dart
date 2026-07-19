@@ -57,9 +57,33 @@ class MyHomePage extends HookWidget {
             itemBuilder: (context, index) {
               return Slidable(
                 endActionPane: ActionPane(
-                  extentRatio: 0.2,
+                  extentRatio: 0.3,
                   motion: const ScrollMotion(),
                   children: [
+                    SlidableAction(
+                      onPressed: (context) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AddItemDialog(
+                            existingItem: itemsState.value[index],
+                            onItemAdded: (id, name, expiry) {
+                              if (id == null) {
+                                itemsState.value = [
+                                  ...itemsState.value,
+                                  Item(id: itemsState.value.length, name: name, expiry: expiry),
+                                ];
+                              } else {
+                                itemsState.value[id] = Item(id: id, name: name, expiry: expiry);
+                                itemsState.value = [...itemsState.value];
+                              }
+                            },
+                          ),
+                        );
+                      },
+                      backgroundColor: const Color.fromARGB(255, 47, 97, 138),
+                      icon: Icons.edit,
+                      label: 'Edit'
+                    ),
                     SlidableAction(
                       onPressed: (context) {
                         itemsState.value = List.from(itemsState.value)..removeAt(index);
@@ -93,10 +117,10 @@ class MyHomePage extends HookWidget {
           showDialog(
             context: context,
             builder: (context) => AddItemDialog(
-              onItemAdded: (name, expiry) {
+              onItemAdded: (id, name, expiry) {
                 itemsState.value = [
                   ...itemsState.value,
-                  Item(name: name, expiry: expiry),
+                  Item(id: itemsState.value.length, name: name, expiry: expiry),
                 ];
               },
             ),
@@ -111,14 +135,15 @@ class MyHomePage extends HookWidget {
 }
 
 class AddItemDialog extends HookWidget {
-  final Function(String name, String expiry) onItemAdded;
-  const AddItemDialog({super.key, required this.onItemAdded});
+  final Function(int? id, String name, String expiry) onItemAdded;
+  final Item? existingItem;
+  const AddItemDialog({super.key, required this.onItemAdded, this.existingItem});
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController nameController = useTextEditingController();
-    final TextEditingController expiryController = useTextEditingController();
-    Future<void> _selectDate() async {
+    final TextEditingController nameController = useTextEditingController(text: existingItem?.name);
+    final TextEditingController expiryController = useTextEditingController(text: existingItem?.expiry);
+    Future<void> selectDate() async {
       DateTime? pickedDate = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
@@ -132,7 +157,7 @@ class AddItemDialog extends HookWidget {
     }
 
     return AlertDialog(
-      title: Text('Add new item'),
+      title: (existingItem == null) ? Text('Add item') : Text('Edit item'),
       content: SizedBox(
         height: 170.0,
         child: Column(
@@ -144,7 +169,7 @@ class AddItemDialog extends HookWidget {
             ),
             TextField(
               readOnly: true,
-              onTap: _selectDate,
+              onTap: selectDate,
               controller: expiryController,
               decoration: const InputDecoration(hintText: 'Expiration Date'),
             ),
@@ -154,7 +179,7 @@ class AddItemDialog extends HookWidget {
                 child: Text('Submit'),
                 onPressed: () {
                   if (nameController.text.isNotEmpty) {
-                    onItemAdded(nameController.text, expiryController.text);
+                    onItemAdded(existingItem?.id, nameController.text, expiryController.text);
                     Navigator.of(context).pop();
                   }
                 },
@@ -168,8 +193,9 @@ class AddItemDialog extends HookWidget {
 }
 
 class Item {
+  final int id;
   final String name;
   final String expiry;
 
-  const Item({required this.name, required this.expiry});
+  const Item({required this.id, required this.name, required this.expiry});
 }
